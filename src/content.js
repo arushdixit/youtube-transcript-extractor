@@ -153,16 +153,21 @@ async function injectAIUI() {
 function injectSummaryPanel() {
   if (document.getElementById('yt-ai-summary-panel')) return;
 
-  // Get video title and channel name from page
+  // Get video title and channel image from page
   const videoTitle = document.querySelector('h1.ytd-watch-metadata yt-formatted-string')?.textContent || 'this video';
-  const channelName = document.querySelector('ytd-channel-name#channel-name yt-formatted-string a')?.textContent || 'Unknown Channel';
+  const channelImg = document.querySelector('ytd-video-owner-renderer img#img')?.src || '';
 
   const panel = document.createElement('div');
   panel.id = 'yt-ai-summary-panel';
   panel.innerHTML = `
     <div id="yt-ai-summary-header">
       <div class="header-content">
-        <div class="header-video-title">Summary of <strong>${videoTitle}</strong> by ${channelName}</div>
+        ${channelImg ? `<img src="${channelImg}" class="header-channel-img">` : `
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="#FF0000">
+            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+          </svg>
+        `}
+        <div class="header-video-title">Summary of <strong>${videoTitle}</strong></div>
       </div>
       <div class="header-actions">
         <button id="yt-ai-summary-copy" title="Copy summary">
@@ -217,6 +222,14 @@ function injectSummaryPanel() {
 
   sendBtn.onclick = handleChatSend;
 
+  function appendContextInfo(text) {
+    const div = document.createElement('div');
+    div.className = 'chat-message context-info';
+    div.innerHTML = `<div class="context-bubble">${text}</div>`;
+    messagesContainer.appendChild(div);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  }
+
   async function handleChatSend() {
     const query = textarea.value.trim();
     if (!query) return;
@@ -227,6 +240,11 @@ function injectSummaryPanel() {
 
     // Add user message to UI
     appendChatMessage('user', query);
+
+    const searchFullTranscript = document.getElementById('yt-search-full-transcript').checked;
+    if (searchFullTranscript) {
+      appendContextInfo('Searching full transcript context...');
+    }
 
     // Disable input while generating
     textarea.disabled = true;
@@ -245,18 +263,32 @@ function injectSummaryPanel() {
       const cachedData = await chrome.storage.local.get(cacheKey);
       const transcriptText = cachedData[cacheKey]?.text || '';
 
-      const searchFullTranscript = document.getElementById('yt-search-full-transcript').checked;
+      const summaryText = document.getElementById('yt-summary-data-hidden')?.textContent || document.getElementById('yt-ai-summary-text').innerText;
 
       // Prepare conversation history
-      const history = Array.from(messagesContainer.querySelectorAll('.chat-message')).map(msg => ({
-        role: msg.classList.contains('user') ? 'user' : 'assistant',
-        content: msg.querySelector('.message-bubble').innerText
-      }));
+      const history = Array.from(messagesContainer.querySelectorAll('.chat-message'))
+        .filter(el => !el.classList.contains('context-info'))
+        .map(el => ({
+          role: el.classList.contains('user') ? 'user' : 'assistant',
+          content: el.querySelector('.message-bubble')?.innerText || ''
+        }))
+        .filter(msg => msg.content);
 
       // Create assistant message bubble for streaming
       const assistantMsgDiv = appendChatMessage('assistant', '');
       const bubble = assistantMsgDiv.querySelector('.message-bubble');
       bubble.innerHTML = '<div style="opacity: 0.5;">Thinking...</div>';
+
+      const messages = [
+        { "role": "system", "content": PROMPTS.CHAT_SYSTEM },
+        { "role": "assistant", "content": `SUMMARY CONTEXT: ${summaryText}` }
+      ];
+
+      if (searchFullTranscript && transcriptText) {
+        messages.push({ "role": "system", "content": `VIDEO TRANSCRIPT: ${transcriptText.substring(0, 40000)}` });
+      }
+
+      messages.push(...history);
 
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
@@ -268,11 +300,7 @@ function injectSummaryPanel() {
         },
         body: JSON.stringify({
           "model": model,
-          "messages": [
-            { "role": "system", "content": PROMPTS.CHAT_SYSTEM },
-            { "role": "user", "content": `Context (Transcript): ${searchFullTranscript ? transcriptText : 'Use available context if provided'}` },
-            ...history.slice(-10) // Last 10 messages for context
-          ],
+          "messages": messages,
           "stream": true
         })
       });
@@ -514,10 +542,16 @@ async function handleSummarizeClick(cachedTranscript = null) {
 
     status.textContent = 'Summary generated successfully!';
 
-    // Show chat interface
+    // Show chat interface and add summary to context
     const chatInput = document.getElementById('yt-ai-chat-input');
     if (chatInput) {
       chatInput.style.display = 'block';
+      // Add hidden summary marker for chat engine
+      const summaryMarker = document.createElement('div');
+      summaryMarker.id = 'yt-summary-data-hidden';
+      summaryMarker.style.display = 'none';
+      summaryMarker.textContent = summary;
+      panel.appendChild(summaryMarker);
     }
   } catch (error) {
     status.textContent = 'Error: ' + error.message;
@@ -596,16 +630,49 @@ function renderSimpleMarkdown(text) {
   if (!text) return '';
 
   try {
-    // Configure marked for safe, simple rendering
-    return marked.parse(text, {
+    // 1. Pre-process LaTeX to avoid marked interference
+    let processedText = text;
+    const mathBlocks = [];
+
+    // Replace display blocks \[ ... \] and $$ ... $$
+    processedText = processedText.replace(/(\\\[[\s\S]*?\\\])|(\$\$[\s\S]*?\$\$)/g, (match) => {
+      const formula = match.startsWith('\\\[') ? match.slice(2, -2) : match.slice(2, -2);
+      const id = `__MATH_BLOCK_${mathBlocks.length}__`;
+      mathBlocks.push({ id, formula, display: true });
+      return id;
+    });
+
+    // Replace inline blocks \( ... \) and $ ... $
+    processedText = processedText.replace(/(\\\([\s\S]*?\\\))|(\$[\s\S]*?\$)/g, (match) => {
+      const formula = match.startsWith('\\\(') ? match.slice(2, -2) : match.slice(1, -1);
+      const id = `__MATH_BLOCK_${mathBlocks.length}__`;
+      mathBlocks.push({ id, formula, display: false });
+      return id;
+    });
+
+    // 2. Render Markdown
+    let html = marked.parse(processedText, {
       breaks: true,
       gfm: true,
       headerIds: false,
       mangle: false
     });
+
+    // 3. Post-process: Replace markers with rendered KaTeX
+    mathBlocks.forEach(item => {
+      try {
+        const rendered = typeof katex !== 'undefined'
+          ? katex.renderToString(item.formula, { displayMode: item.display, throwOnError: false })
+          : `<code class="math">${item.formula}</code>`;
+        html = html.replace(item.id, rendered);
+      } catch (e) {
+        html = html.replace(item.id, item.formula);
+      }
+    });
+
+    return html;
   } catch (e) {
-    console.error('Markdown parsing error:', e);
-    // Fallback to plain text if marked fails
+    console.error('Markdown/Math parsing error:', e);
     return text.replace(/\n/g, '<br>');
   }
 }

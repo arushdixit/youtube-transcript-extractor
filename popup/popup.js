@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       try {
         await chrome.scripting.executeScript({
           target: { tabId: tab.id },
-          files: ['src/config.js', 'src/prompts.js', 'lib/marked.min.js', 'src/content.js']
+          files: ['src/config.js', 'src/prompts.js', 'lib/marked.min.js', 'lib/katex.min.js', 'src/content.js']
         });
         console.log('Content script injected');
         // Wait a bit longer after fresh injection

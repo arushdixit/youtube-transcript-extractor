@@ -36,10 +36,12 @@
         "src/config.js",
         "src/prompts.js",
         "lib/marked.min.js",
+        "lib/katex.min.js",
         "src/content.js"
       ],
       "css": [
         "lib/github-markdown.min.css",
+        "lib/katex.min.css",
         "src/content.css"
       ]
     }
