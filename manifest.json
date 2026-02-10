@@ -14,18 +14,18 @@
     "https://*.youtube.com/*"
   ],
   "action": {
-    "default_popup": "popup.html",
+    "default_popup": "popup/popup.html",
     "default_icon": {
-      "16": "icon16.png",
-      "48": "icon48.png",
-      "128": "icon128.png"
+      "16": "assets/icon16.png",
+      "48": "assets/icon48.png",
+      "128": "assets/icon128.png"
     }
   },
-  "options_page": "options.html",
+  "options_page": "options/options.html",
   "icons": {
-    "16": "icon16.png",
-    "48": "icon48.png",
-    "128": "icon128.png"
+    "16": "assets/icon16.png",
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png"
   },
   "content_scripts": [
     {
@@ -33,15 +33,21 @@
         "https://www.youtube.com/watch*"
       ],
       "js": [
-        "config.js",
-        "content.js"
+        "src/config.js",
+        "src/prompts.js",
+        "lib/marked.min.js",
+        "src/content.js"
+      ],
+      "css": [
+        "lib/github-markdown.min.css",
+        "src/content.css"
       ]
     }
   ],
   "web_accessible_resources": [
     {
       "resources": [
-        "config.js"
+        "src/config.js"
       ],
       "matches": [
         "https://www.youtube.com/*"

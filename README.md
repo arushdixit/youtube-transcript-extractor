@@ -31,8 +31,30 @@ A Chrome extension that extracts transcripts from YouTube videos.
 ## Usage
 
 1. Navigate to any YouTube video page (not shorts).
-2. Click **"Summarize with AI"** directly in the video action row to generate detailed notes.
-3. Or click the extension icon and "Extract Transcript" for the raw text.
+2. Click **"Summarize with AI"** in the video action row (next to Like/Share buttons).
+3. The AI summary panel will slide in from the right side.
+
+### Keyboard Shortcuts
+
+- **Mac**: `Ctrl + S` - Toggle AI summary panel
+- **Windows**: `Ctrl + Alt + S` - Toggle AI summary panel
+
+### Panel Features
+
+- **Draggable**: Click and drag the panel header to reposition it anywhere on screen
+- **Real-time Streaming**: Watch the summary generate in real-time as the AI processes the video
+- **Smart Caching**: Summaries are cached per video - instant loading on revisit
+- **Regenerate**: Click "Regenerate" to create a fresh summary with updated settings
+- **Copy**: One-click copy of the entire summary to clipboard
+
+### Smart Caching
+
+The extension intelligently caches both transcripts and summaries:
+- **Transcripts**: Extracted once per video and saved locally
+- **Summaries**: Cached per video + model combination
+- **Instant Loading**: Revisit any video for instant summary display
+- **Regenerate Option**: Override cache anytime with the "Regenerate" button
+- **Persistent Position**: Panel position is remembered across sessions
 
 ## Notes
 

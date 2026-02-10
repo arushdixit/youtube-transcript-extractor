@@ -1,0 +1,477 @@
+@keyframes slideInFromRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+#yt-ai-summary-panel {
+    position: fixed;
+    right: 20px;
+    top: 80px;
+    width: 500px;
+    max-height: calc(100vh - 120px);
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    z-index: 2001;
+    display: none;
+    flex-direction: column;
+    font-family: 'Roboto', 'Arial', sans-serif;
+    overflow: hidden;
+    animation: slideInFromRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#yt-ai-summary-panel.dragging {
+    cursor: move;
+    user-select: none;
+}
+
+#yt-ai-summary-header {
+    padding: 16px 20px;
+    background: linear-gradient(180deg, #f9f9f9 0%, #ffffff 100%);
+    border-bottom: 1px solid #e5e5e5;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    cursor: move;
+    user-select: none;
+}
+
+.header-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.header-video-title {
+    font-size: 14px;
+    color: #0f0f0f;
+    font-weight: 400;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    max-height: 4.5em;
+}
+
+.header-video-title strong {
+    font-weight: 600;
+    color: #0f0f0f;
+}
+
+.header-actions {
+    display: flex;
+    gap: 8px;
+    margin-left: 12px;
+    flex-shrink: 0;
+}
+
+#yt-ai-summary-messages {
+    padding: 20px;
+    overflow-y: auto;
+    flex-grow: 1;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #0f0f0f;
+}
+
+#yt-ai-summary-status {
+    color: #606060;
+    font-style: italic;
+    margin-bottom: 16px;
+    font-size: 13px;
+}
+
+#yt-ai-summary-text {
+    padding: 4px 0;
+}
+
+/* Theming GitHub Markdown CSS for YouTube */
+.markdown-body {
+    box-sizing: border-box;
+    min-width: 200px;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0;
+    font-family: 'Roboto', 'Arial', sans-serif !important;
+    background-color: transparent !important;
+    color: #0f0f0f !important;
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3 {
+    border-bottom: 1px solid #e5e5e5 !important;
+    font-weight: 600 !important;
+    color: #0f0f0f !important;
+    letter-spacing: -0.01em !important;
+}
+
+.markdown-body h2 {
+    color: #FF0000 !important;
+}
+
+.markdown-body a {
+    color: #FF0000 !important;
+}
+
+.markdown-body pre {
+    background-color: #f8f8f8 !important;
+    border-radius: 10px !important;
+    border: 1px solid #e5e5e5 !important;
+}
+
+.markdown-body code {
+    background-color: rgba(0, 0, 0, 0.05) !important;
+    border-radius: 6px !important;
+    font-family: 'Roboto Mono', monospace !important;
+}
+
+.markdown-body table th {
+    background-color: #f5f5f5 !important;
+}
+
+#yt-ai-summary-copy,
+#yt-ai-summary-close {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: background 0.2s;
+    color: #606060;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+}
+
+#yt-ai-summary-copy:hover,
+#yt-ai-summary-close:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+#yt-ai-summary-close {
+    font-size: 28px;
+}
+
+/* Chat Interface Styles */
+#yt-ai-chat-input {
+    border-top: 1px solid #e5e5e5;
+    background: #f9f9f9;
+    padding: 12px 16px;
+}
+
+.chat-input-controls {
+    margin-bottom: 8px;
+}
+
+.transcript-toggle {
+    display: inline-flex;
+    align-items: center;
+    font-size: 12px;
+    color: #606060;
+    cursor: pointer;
+    user-select: none;
+}
+
+.transcript-toggle input[type="checkbox"] {
+    margin-right: 6px;
+    cursor: pointer;
+}
+
+.chat-input-row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+}
+
+#yt-chat-textarea {
+    flex: 1;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    padding: 10px 16px;
+    font-family: 'Roboto', 'Arial', sans-serif;
+    font-size: 14px;
+    resize: none;
+    max-height: 100px;
+    line-height: 1.4;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+#yt-chat-textarea:focus {
+    border-color: #FF0000;
+}
+
+#yt-chat-send {
+    background: #FF0000;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+    color: white;
+    flex-shrink: 0;
+}
+
+#yt-chat-send:hover {
+    background: #0448a0;
+}
+
+#yt-chat-send:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+/* Message Bubbles */
+.chat-message {
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-message.user {
+    align-items: flex-end;
+}
+
+.chat-message.assistant {
+    align-items: flex-start;
+}
+
+.message-bubble {
+    max-width: 85%;
+    padding: 10px 14px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.chat-message.user .message-bubble {
+    background: #FF0000;
+    color: white;
+    border-bottom-right-radius: 4px;
+}
+
+.chat-message.assistant .message-bubble {
+    background: #f2f2f2;
+    color: #0f0f0f;
+    border-bottom-left-radius: 4px;
+}
+
+.message-timestamp {
+    font-size: 11px;
+    color: #606060;
+    margin-top: 4px;
+    padding: 0 4px;
+}
+
+/* Dark Mode Support */
+html[dark] #yt-ai-summary-panel,
+[dark] #yt-ai-summary-panel {
+    background: #212121;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+html[dark] #yt-ai-summary-header,
+[dark] #yt-ai-summary-header {
+    background: linear-gradient(180deg, #2a2a2a 0%, #212121 100%);
+    border-bottom: 1px solid #3a3a3a;
+}
+
+html[dark] .header-video-title,
+[dark] .header-video-title {
+    color: #f1f1f1;
+}
+
+html[dark] .header-video-title strong,
+[dark] .header-video-title strong {
+    color: #ffffff;
+}
+
+html[dark] #yt-ai-summary-copy,
+html[dark] #yt-ai-summary-close,
+[dark] #yt-ai-summary-copy,
+[dark] #yt-ai-summary-close {
+    color: #aaa;
+}
+
+html[dark] #yt-ai-summary-copy:hover,
+html[dark] #yt-ai-summary-close:hover,
+[dark] #yt-ai-summary-copy:hover,
+[dark] #yt-ai-summary-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+html[dark] #yt-ai-summary-messages,
+[dark] #yt-ai-summary-messages {
+    color: #f1f1f1;
+}
+
+html[dark] #yt-ai-summary-status,
+[dark] #yt-ai-summary-status {
+    color: #aaa;
+}
+
+html[dark] .markdown-body,
+[dark] .markdown-body {
+    color: #f1f1f1 !important;
+}
+
+html[dark] .markdown-body h1,
+html[dark] .markdown-body h2,
+html[dark] .markdown-body h3,
+[dark] .markdown-body h1,
+[dark] .markdown-body h2,
+[dark] .markdown-body h3 {
+    border-bottom-color: #3a3a3a !important;
+    color: #f1f1f1 !important;
+}
+
+html[dark] .markdown-body h2,
+[dark] .markdown-body h2 {
+    color: #FF4444 !important;
+}
+
+html[dark] .markdown-body a,
+[dark] .markdown-body a {
+    color: #FF4444 !important;
+}
+
+html[dark] .markdown-body code,
+[dark] .markdown-body code {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: #ff6b9d !important;
+}
+
+html[dark] .markdown-body pre,
+[dark] .markdown-body pre {
+    background-color: #1a1a1a !important;
+    border-color: #3a3a3a !important;
+}
+
+html[dark] .markdown-body table th,
+[dark] .markdown-body table th {
+    background-color: #2a2a2a !important;
+    border-color: #3a3a3a !important;
+}
+
+html[dark] .markdown-body table td,
+[dark] .markdown-body table td {
+    border-color: #3a3a3a !important;
+}
+
+html[dark] .markdown-body table tr:nth-child(even),
+[dark] .markdown-body table tr:nth-child(even) {
+    background-color: #252525 !important;
+}
+
+html[dark] .markdown-body hr,
+[dark] .markdown-body hr {
+    background-color: #3a3a3a !important;
+}
+
+html[dark] #yt-ai-chat-input,
+[dark] #yt-ai-chat-input {
+    background: #2a2a2a;
+    border-top-color: #3a3a3a;
+}
+
+html[dark] .transcript-toggle,
+[dark] .transcript-toggle {
+    color: #aaa;
+}
+
+html[dark] #yt-chat-textarea,
+[dark] #yt-chat-textarea {
+    background: #1a1a1a;
+    border-color: #444;
+    color: #f1f1f1;
+}
+
+html[dark] #yt-chat-textarea:focus,
+[dark] #yt-chat-textarea:focus {
+    border-color: #FF4444;
+}
+
+html[dark] .chat-message.assistant .message-bubble,
+[dark] .chat-message.assistant .message-bubble {
+    background: #2a2a2a;
+    color: #f1f1f1;
+}
+
+html[dark] .message-timestamp,
+[dark] .message-timestamp {
+    color: #888;
+}
+
+/* YouTube AI Summarize Button */
+.yt-ai-summarize-btn {
+    background-color: rgba(255, 68, 68, 0.1) !important;
+    color: #0f0f0f !important;
+    border: 1px solid rgba(255, 68, 68, 0.3) !important;
+    border-radius: 18px !important;
+    padding: 0 16px !important;
+    height: 36px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    margin-left: 8px !important;
+    font-family: 'Roboto', Arial, sans-serif !important;
+    transition: all 0.2s ease !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.yt-ai-btn-icon {
+    margin-right: 8px !important;
+    fill: #FF4444 !important;
+    /* YouTube Red secondary */
+}
+
+.yt-ai-btn-text {
+    font-weight: 500 !important;
+}
+
+.yt-ai-summarize-btn:hover {
+    background-color: rgba(255, 68, 68, 0.2) !important;
+    border-color: rgba(255, 68, 68, 0.5) !important;
+}
+
+html[dark] .yt-ai-summarize-btn,
+[dark] .yt-ai-summarize-btn {
+    background-color: rgba(255, 68, 68, 0.15) !important;
+    color: #f1f1f1 !important;
+    border-color: rgba(255, 68, 68, 0.4) !important;
+}
+
+html[dark] .yt-ai-summarize-btn:hover,
+[dark] .yt-ai-summarize-btn:hover {
+    background-color: rgba(255, 68, 68, 0.25) !important;
+    border-color: rgba(255, 68, 68, 0.6) !important;
+}
