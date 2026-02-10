@@ -155,10 +155,16 @@ function injectSummaryPanel() {
       font-style: italic;
       margin-bottom: 10px;
     }
-    #yt-ai-summary-text h1 { font-size: 1.4em; margin-top: 20px; border-bottom: 2px solid #eee; padding-bottom: 5px; }
-    #yt-ai-summary-text h2 { font-size: 1.2em; margin-top: 15px; color: #065fd4; }
-    #yt-ai-summary-text ul { padding-left: 20px; }
-    #yt-ai-summary-text li { margin-bottom: 5px; }
+    #yt-ai-summary-text { padding-top: 10px; }
+    #yt-ai-summary-text h1 { font-size: 1.4em; margin-top: 24px; margin-bottom: 12px; border-bottom: 2px solid #eee; padding-bottom: 8px; color: #0f0f0f; }
+    #yt-ai-summary-text h2 { font-size: 1.2em; margin-top: 20px; margin-bottom: 10px; color: #065fd4; }
+    #yt-ai-summary-text h3 { font-size: 1.1em; margin-top: 16px; margin-bottom: 8px; color: #333; }
+    #yt-ai-summary-text p { margin-bottom: 12px; line-height: 1.6; }
+    #yt-ai-summary-text ul, #yt-ai-summary-text ol { padding-left: 24px; margin-bottom: 16px; }
+    #yt-ai-summary-text li { margin-bottom: 8px; }
+    #yt-ai-summary-text strong { color: #0f0f0f; font-weight: 600; }
+    #yt-ai-summary-text code { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-family: 'Roboto Mono', monospace; font-size: 0.9em; }
+    #yt-ai-summary-text pre { background: #f5f5f5; padding: 12px; border-radius: 8px; overflow-x: auto; margin-bottom: 16px; }
     #yt-ai-summary-copy, #yt-ai-summary-close {
       background: none;
       border: none;
@@ -225,23 +231,30 @@ async function handleSummarizeClick() {
 }
 
 async function getAISummary(transcriptText, apiKey, model) {
-  const prompt = `You are an expert note-taker and technical explainer. Your job is to carefully process this video transcript and create a set of detailed, organized notes that capture every single concept, term, example, and insight mentioned, in the exact order they appear, without omitting anything.
+  const prompt = `You are an intelligent video summarizer. Analyze this YouTube video transcript and create a clear, useful summary.
 
-URL of the video: ${window.location.href}
+Video URL: ${window.location.href}
+
+Your goal is to help the viewer quickly understand what this video is about and decide if they want to watch it, or help them recall key points after watching.
 
 Instructions:
-1. Watch/Read Everything Fully: Do not skip or summarize too broadly. Include all points, even if they seem minor or repetitive, unless they are literal filler or unrelated chatter.
-2. Time-Stamped Structure: Add timestamps (HH:MM:SS) before each section or key point so I can quickly revisit the exact spot in the video.
-3. Hierarchical Breakdown: Use H1 for Major topics, H2 for Subtopics, and Bullets for Details.
-4. Definitions & Jargon: Explain technical terms in simple terms alongside their definition.
-5. Examples & Analogies: Record every example, analogy, or metaphor given.
-6. Important Quotes: Write verbatim inside quotes.
-7. Diagrams & Visual References: Describe visuals in text.
-8. Extra Resources Mentioned: List any books, papers, tools, or websites referenced.
-9. Summary Section at the End: 
-   - A 1-paragraph high-level summary
-   - Key Takeaways list (10-15 insights)
-   - Glossary of all technical terms
+1. **Identify the video type** (tutorial, discussion, vlog, interview, educational, entertainment, etc.) and adapt your summary style accordingly.
+
+2. **Extract the core message**: What is the main point or purpose of this video? Start with this.
+
+3. **Organize by themes, not chronology**: Group related ideas together rather than following the transcript order.
+
+4. **Be selective**: Focus on insights, key arguments, actionable advice, and important information. Skip filler, repetition, and tangents.
+
+5. **Use clear structure**:
+   - Brief overview (2-3 sentences)
+   - Main points (3-7 key ideas, depending on video length and density)
+   - Notable details (quotes, examples, or specifics worth remembering)
+   - Optional: Resources mentioned or next steps suggested
+
+6. **Add timestamps** only for major sections or particularly important moments - not everything.
+
+7. **Write naturally**: Use clear, concise language. Avoid robotic formatting or forced structure.
 
 Transcript:
 ${transcriptText}`;
@@ -270,18 +283,96 @@ ${transcriptText}`;
 }
 
 function renderSimpleMarkdown(text) {
-  // Very basic markdown to HTML for display
+  if (!text) return '';
+
+  let html = '';
+  const lines = text.split('\n');
+  let inList = false;
+  let listType = ''; // 'ul' or 'ol'
+  let inCodeBlock = false;
+  let codeBlockContent = '';
+
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i];
+    let trimmedLine = line.trim();
+
+    // Code Blocks
+    if (trimmedLine.startsWith('```')) {
+      if (inCodeBlock) {
+        html += `<pre><code>${codeBlockContent.trim()}</code></pre>`;
+        inCodeBlock = false;
+        codeBlockContent = '';
+      } else {
+        if (inList) { html += `</${listType}>`; inList = false; }
+        inCodeBlock = true;
+      }
+      continue;
+    }
+
+    if (inCodeBlock) {
+      codeBlockContent += line + '\n';
+      continue;
+    }
+
+    if (!trimmedLine) {
+      if (inList) {
+        html += `</${listType}>`;
+        inList = false;
+      }
+      continue;
+    }
+
+    // Headers
+    if (trimmedLine.startsWith('# ')) {
+      if (inList) { html += `</${listType}>`; inList = false; }
+      html += `<h1>${processInlineMarkdown(trimmedLine.substring(2))}</h1>`;
+    } else if (trimmedLine.startsWith('## ')) {
+      if (inList) { html += `</${listType}>`; inList = false; }
+      html += `<h2>${processInlineMarkdown(trimmedLine.substring(3))}</h2>`;
+    } else if (trimmedLine.startsWith('### ')) {
+      if (inList) { html += `</${listType}>`; inList = false; }
+      html += `<h3>${processInlineMarkdown(trimmedLine.substring(4))}</h3>`;
+    }
+    // Lists
+    else if (trimmedLine.startsWith('* ') || trimmedLine.startsWith('- ')) {
+      if (!inList || listType !== 'ul') {
+        if (inList) html += `</${listType}>`;
+        html += '<ul>';
+        inList = true;
+        listType = 'ul';
+      }
+      html += `<li>${processInlineMarkdown(trimmedLine.substring(2))}</li>`;
+    } else if (trimmedLine.match(/^\d+\.\s/)) {
+      if (!inList || listType !== 'ol') {
+        if (inList) html += `</${listType}>`;
+        html += '<ol>';
+        inList = true;
+        listType = 'ol';
+      }
+      html += `<li>${processInlineMarkdown(trimmedLine.replace(/^\d+\.\s/, ''))}</li>`;
+    }
+    // Normal text
+    else {
+      if (inList) {
+        html += `</${listType}>`;
+        inList = false;
+      }
+      html += `<p>${processInlineMarkdown(line)}</p>`;
+    }
+  }
+
+  if (inList) html += `</${listType}>`;
+  if (inCodeBlock) html += `<pre><code>${codeBlockContent.trim()}</code></pre>`;
+
+  return html;
+}
+
+function processInlineMarkdown(text) {
   return text
-    .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-    .replace(/^## (.*$)/gim, '<h2>$2</h2>')
-    .replace(/^### (.*$)/gim, '<h3>$3</h3>')
-    .replace(/^\* (.*$)/gim, '<ul><li>$1</li></ul>')
-    .replace(/^- (.*$)/gim, '<ul><li>$1</li></ul>')
-    .replace(/\n\n/g, '<br>')
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.*?)\*/g, '<em>$1</em>')
     .replace(/`(.*?)`/g, '<code>$1</code>')
-    .replace(/<\/ul><ul>/g, ''); // Join adjacent lists
+    .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
 }
 
 async function extractTranscript() {
