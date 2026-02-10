@@ -1,0 +1,51 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube Transcript Extractor",
+  "version": "1.0",
+  "description": "Extract transcripts from YouTube videos",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "clipboardWrite",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://www.youtube.com/*",
+    "https://*.youtube.com/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "options_page": "options.html",
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.youtube.com/watch*"
+      ],
+      "js": [
+        "config.js",
+        "content.js"
+      ]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "config.js"
+      ],
+      "matches": [
+        "https://www.youtube.com/*"
+      ]
+    }
+  ]
+}

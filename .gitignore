@@ -1,0 +1,9 @@
+# Local configuration
+config.local.js
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Extension build/temporary files
+*.log
