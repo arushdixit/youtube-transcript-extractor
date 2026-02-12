@@ -637,7 +637,7 @@ function renderSimpleMarkdown(text) {
     // Replace display blocks \[ ... \] and $$ ... $$
     processedText = processedText.replace(/(\\\[[\s\S]*?\\\])|(\$\$[\s\S]*?\$\$)/g, (match) => {
       const formula = match.startsWith('\\\[') ? match.slice(2, -2) : match.slice(2, -2);
-      const id = `__MATH_BLOCK_${mathBlocks.length}__`;
+      const id = `@@MATHBLOCK${mathBlocks.length}@@`;
       mathBlocks.push({ id, formula, display: true });
       return id;
     });
@@ -645,7 +645,7 @@ function renderSimpleMarkdown(text) {
     // Replace inline blocks \( ... \) and $ ... $
     processedText = processedText.replace(/(\\\([\s\S]*?\\\))|(\$[\s\S]*?\$)/g, (match) => {
       const formula = match.startsWith('\\\(') ? match.slice(2, -2) : match.slice(1, -1);
-      const id = `__MATH_BLOCK_${mathBlocks.length}__`;
+      const id = `@@MATHBLOCK${mathBlocks.length}@@`;
       mathBlocks.push({ id, formula, display: false });
       return id;
     });

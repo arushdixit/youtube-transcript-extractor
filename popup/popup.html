@@ -6,8 +6,16 @@
   <style>
     body {
       width: 400px;
-      padding: 15px;
-      font-family: Arial, sans-serif;
+      padding: 0;
+      margin: 0;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(135deg, #ffffff 0%, #f0f2f5 100%);
+      min-height: 200px;
+      overflow-x: hidden;
+    }
+
+    .main-container {
+      padding: 20px;
     }
 
     #status {
@@ -17,17 +25,23 @@
 
     #extract-btn {
       width: 100%;
-      padding: 10px;
-      background-color: #ff0000;
+      padding: 12px;
+      /* YouTube Red Gradient */
+      background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
       color: white;
       border: none;
-      border-radius: 4px;
+      border-radius: 10px;
       cursor: pointer;
-      font-size: 14px;
+      font-size: 15px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(255, 0, 0, 0.2);
     }
 
     #extract-btn:hover {
-      background-color: #cc0000;
+      background: linear-gradient(135deg, #cc0000 0%, #aa0000 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 15px rgba(255, 0, 0, 0.3);
     }
 
     #extract-btn:disabled {
@@ -39,10 +53,13 @@
       margin-top: 15px;
       max-height: 400px;
       overflow-y: auto;
-      border: 1px solid #ddd;
-      padding: 10px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 12px;
+      padding: 15px;
       display: none;
-      background-color: #f9f9f9;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
     }
 
     .timestamp {
@@ -58,19 +75,24 @@
     #copy-btn,
     #ai-summarize-btn {
       width: 100%;
-      padding: 8px;
-      margin-top: 10px;
-      background-color: #065fd4;
+      padding: 10px;
+      margin-top: 12px;
+      background: linear-gradient(135deg, #065fd4 0%, #0448a8 100%);
       color: white;
       border: none;
-      border-radius: 4px;
+      border-radius: 10px;
       cursor: pointer;
       display: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(6, 95, 212, 0.2);
     }
 
     #copy-btn:hover,
     #ai-summarize-btn:hover {
-      background-color: #0448a8;
+      background: linear-gradient(135deg, #0448a8 0%, #033985 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 15px rgba(6, 95, 212, 0.3);
     }
 
     #ai-summarize-btn:disabled {
@@ -81,12 +103,14 @@
 </head>
 
 <body>
-  <div id="status">YouTube Transcript Extractor</div>
-  <div id="info" style="font-size: 12px; color: #666; margin-bottom: 10px;"></div>
-  <button id="extract-btn">Extract Transcript</button>
-  <button id="ai-summarize-btn">AI Summarize</button>
-  <button id="copy-btn">Copy Transcript</button>
-  <div id="transcript-container"></div>
+  <div class="main-container">
+    <div id="status">YouTube Transcript Extractor</div>
+    <div id="info" style="font-size: 12px; color: #666; margin-bottom: 12px;"></div>
+    <button id="extract-btn">Extract Transcript</button>
+    <button id="ai-summarize-btn">AI Summarize</button>
+    <button id="copy-btn">Copy Transcript</button>
+    <div id="transcript-container"></div>
+  </div>
   <script src="popup.js"></script>
 </body>
 

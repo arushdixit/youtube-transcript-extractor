@@ -26,9 +26,12 @@
     top: 80px;
     width: 500px;
     max-height: calc(100vh - 120px);
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.75) 0%, rgba(248, 249, 252, 0.7) 100%);
+    backdrop-filter: blur(25px) saturate(180%);
+    -webkit-backdrop-filter: blur(25px) saturate(180%);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
     z-index: 2001;
     display: none;
     flex-direction: column;
@@ -44,11 +47,11 @@
 
 #yt-ai-summary-header {
     padding: 16px 20px;
-    background: #0f0f0f;
+    background: linear-gradient(90deg, #121212 0%, #242424 100%);
     /* Dark YouTube-like header */
     color: white;
-    border-top: 4px solid #FF0000;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 5px solid #FF0000;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -204,9 +207,9 @@
 
 /* Chat Interface Styles */
 #yt-ai-chat-input {
-    border-top: 1px solid #e5e5e5;
-    background: #f9f9f9;
-    padding: 12px 16px;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    background: rgba(255, 255, 255, 0.4);
+    padding: 16px 20px;
 }
 
 .chat-input-controls {
@@ -305,9 +308,9 @@
 }
 
 .chat-message.assistant .message-bubble {
-    background: #f8f8f8;
+    background: rgba(255, 255, 255, 0.6);
     color: #0f0f0f;
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.04);
     border-bottom-left-radius: 4px;
 }
 
@@ -335,8 +338,11 @@
 /* Dark Mode Support */
 html[dark] #yt-ai-summary-panel,
 [dark] #yt-ai-summary-panel {
-    background: #212121;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
+    background: linear-gradient(145deg, rgba(30, 30, 30, 0.8) 0%, rgba(18, 18, 18, 0.75) 100%);
+    backdrop-filter: blur(25px) saturate(180%);
+    -webkit-backdrop-filter: blur(25px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
 html[dark] #yt-ai-summary-header,
@@ -444,8 +450,8 @@ html[dark] .markdown-body hr,
 
 html[dark] #yt-ai-chat-input,
 [dark] #yt-ai-chat-input {
-    background: #2a2a2a;
-    border-top-color: #3a3a3a;
+    background: rgba(0, 0, 0, 0.2);
+    border-top-color: rgba(255, 255, 255, 0.08);
 }
 
 html[dark] .transcript-toggle,
@@ -467,8 +473,9 @@ html[dark] #yt-chat-textarea:focus,
 
 html[dark] .chat-message.assistant .message-bubble,
 [dark] .chat-message.assistant .message-bubble {
-    background: #2a2a2a;
+    background: rgba(255, 255, 255, 0.05);
     color: #f1f1f1;
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 html[dark] .message-timestamp,
