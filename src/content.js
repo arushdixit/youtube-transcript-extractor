@@ -178,6 +178,7 @@ function injectSummaryPanel() {
         <button id="yt-ai-summary-close" title="Close">×</button>
       </div>
     </div>
+    <div id="yt-ai-pills-container"></div>
     <div id="yt-ai-summary-messages">
       <div id="yt-ai-summary-status">Click "Summarize with AI" to begin...</div>
       <div id="yt-ai-summary-text" class="markdown-body"></div>
@@ -451,16 +452,63 @@ function injectSummaryPanel() {
       });
     }
   });
+
+  // Render pills
+  renderPills();
 }
 
-async function handleSummarizeClick(cachedTranscript = null) {
+async function renderPills(activeVariant = 'general') {
+  const container = document.getElementById('yt-ai-pills-container');
+  if (!container) return;
+
+  container.innerHTML = '';
+
+  // Get built-in variants
+  const builtIn = PROMPTS.SUMMARY_VARIANTS;
+
+  // Get custom prompts from storage
+  const settings = await chrome.storage.local.get(['customPrompts']);
+  const custom = settings.customPrompts || [];
+
+  const allVariants = [
+    ...Object.entries(builtIn).map(([id, data]) => ({ id, label: data.label, type: 'builtin' })),
+    ...custom.map((p, index) => ({ id: `custom_${index}`, label: p.label, instructions: p.instructions, type: 'custom' }))
+  ];
+
+  allVariants.forEach(variant => {
+    const pill = document.createElement('div');
+    pill.className = `summary-pill ${variant.id === activeVariant ? 'active' : ''}`;
+    pill.textContent = variant.label;
+    pill.onclick = () => {
+      if (pill.classList.contains('active')) return;
+
+      // Update active state
+      document.querySelectorAll('.summary-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+
+      // Trigger summary with this variant
+      const videoId = new URLSearchParams(window.location.search).get('v');
+      const cacheKey = `transcript_${videoId}`;
+      chrome.storage.local.get(cacheKey).then(data => {
+        handleSummarizeClick(data[cacheKey]?.text, variant);
+      });
+    };
+    container.appendChild(pill);
+  });
+}
+
+async function handleSummarizeClick(cachedTranscript = null, variant = { id: 'general', label: 'General', type: 'builtin' }) {
   const panel = document.getElementById('yt-ai-summary-panel');
   const status = document.getElementById('yt-ai-summary-status');
   const textDiv = document.getElementById('yt-ai-summary-text');
 
   panel.style.display = 'flex';
-  status.textContent = 'Preparing summary...';
+  status.textContent = `Preparing ${variant.label.toLowerCase()} summary...`;
+  status.style.color = ''; // Reset error color
   textDiv.textContent = '';
+
+  // Ensure pills are rendered and active
+  renderPills(variant.id);
 
   try {
     let transcriptText = cachedTranscript;
@@ -501,24 +549,16 @@ async function handleSummarizeClick(cachedTranscript = null) {
       throw new Error('API Key missing. Please set it in the extension options.');
     }
 
-    // Check if we have a cached summary for this video
+    // Check if we have a cached summary for this video AND this variant
     const videoId = new URLSearchParams(window.location.search).get('v');
-    const summaryCacheKey = `summary_${videoId}_${modelToUse}`;
+    const summaryCacheKey = `summary_${videoId}_${modelToUse}_${variant.id}`;
     const cachedSummaryData = await chrome.storage.local.get(summaryCacheKey);
 
     if (cachedSummaryData[summaryCacheKey]) {
       // Use cached summary
-      console.log('Using cached summary');
-      status.textContent = 'Loaded from cache';
+      console.log(`Using cached summary for ${variant.id}`);
+      status.textContent = `${variant.label} Summary Loaded`;
       textDiv.innerHTML = renderSimpleMarkdown(cachedSummaryData[summaryCacheKey].summary);
-
-      // Add regenerate option
-      status.innerHTML = 'Loaded from cache • <span style="color: #FF0000; cursor: pointer; text-decoration: underline;" id="regenerate-summary">Regenerate</span>';
-      document.getElementById('regenerate-summary').onclick = async () => {
-        // Clear cache and regenerate
-        await chrome.storage.local.remove(summaryCacheKey);
-        handleSummarizeClick(transcriptText);
-      };
 
       // Show chat interface
       const chatInput = document.getElementById('yt-ai-chat-input');
@@ -528,9 +568,19 @@ async function handleSummarizeClick(cachedTranscript = null) {
       return;
     }
 
-    status.textContent = 'Generating summary using AI...';
+    status.textContent = `Generating ${variant.label.toLowerCase()} summary...`;
 
-    const summary = await getAISummary(transcriptText, apiKey, modelToUse, textDiv, status);
+    // Determine the prompt to use
+    let instructions = '';
+    if (variant.type === 'builtin') {
+      instructions = PROMPTS.SUMMARY_VARIANTS[variant.id].instructions;
+    } else {
+      instructions = variant.instructions;
+    }
+
+    const systemPrompt = PROMPTS.SYSTEM_BASE.replace('[SPECIFIC_INSTRUCTIONS]', instructions);
+
+    const summary = await getAISummary(transcriptText, apiKey, modelToUse, textDiv, status, systemPrompt);
 
     // Cache the summary
     await chrome.storage.local.set({
@@ -560,7 +610,7 @@ async function handleSummarizeClick(cachedTranscript = null) {
   }
 }
 
-async function getAISummary(transcriptText, apiKey, model, textDiv, status) {
+async function getAISummary(transcriptText, apiKey, model, textDiv, status, systemPrompt) {
 
   const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
@@ -573,7 +623,7 @@ async function getAISummary(transcriptText, apiKey, model, textDiv, status) {
     body: JSON.stringify({
       "model": model,
       "messages": [
-        { "role": "system", "content": PROMPTS.SUMMARY_SYSTEM },
+        { "role": "system", "content": systemPrompt },
         { "role": "user", "content": `Transcript:\n${transcriptText}\n\nVideo URL: ${window.location.href}` }
       ],
       "stream": true

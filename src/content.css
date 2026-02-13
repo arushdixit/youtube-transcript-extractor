@@ -57,7 +57,7 @@
     align-items: center;
     cursor: move;
     user-select: none;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .header-content {
@@ -65,7 +65,7 @@
     min-width: 0;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
 }
 
 .header-video-title {
@@ -104,7 +104,7 @@
 }
 
 #yt-ai-summary-messages {
-    padding: 20px;
+    padding: 0 20px 20px 20px;
     overflow-y: auto;
     flex-grow: 1;
     font-size: 14px;
@@ -112,11 +112,55 @@
     color: #0f0f0f;
 }
 
+/* Pills UI */
+#yt-ai-pills-container {
+    padding: 10px 16px;
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+#yt-ai-pills-container::-webkit-scrollbar {
+    display: none;
+    /* Chrome/Safari */
+}
+
+.summary-pill {
+    padding: 6px 14px;
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #606060;
+}
+
+.summary-pill:hover {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(255, 0, 0, 0.3);
+    color: #FF0000;
+}
+
+.summary-pill.active {
+    background: #FF0000;
+    color: white;
+    border-color: #FF0000;
+    box-shadow: 0 2px 8px rgba(255, 0, 0, 0.2);
+}
+
 #yt-ai-summary-status {
     color: #606060;
     font-style: italic;
     margin-bottom: 16px;
     font-size: 13px;
+    margin-top: 10px;
 }
 
 #yt-ai-summary-text {
@@ -379,6 +423,32 @@ html[dark] #yt-ai-summary-close:hover,
 html[dark] #yt-ai-summary-messages,
 [dark] #yt-ai-summary-messages {
     color: #f1f1f1;
+}
+
+html[dark] #yt-ai-pills-container,
+[dark] #yt-ai-pills-container {
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+html[dark] .summary-pill,
+[dark] .summary-pill {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #aaa;
+}
+
+html[dark] .summary-pill:hover,
+[dark] .summary-pill:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+html[dark] .summary-pill.active,
+[dark] .summary-pill.active {
+    background: #FF0000;
+    color: #fff;
+    border-color: #FF0000;
 }
 
 html[dark] #yt-ai-summary-status,
